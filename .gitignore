@@ -1,0 +1,4 @@
+configs/bot.env
+.idea
+.DS_Store
+users.xlsx
