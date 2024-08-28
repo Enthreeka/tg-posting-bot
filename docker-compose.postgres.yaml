@@ -1,0 +1,24 @@
+services:
+
+  db:
+    image: postgres:15
+    restart: always
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./migration/up:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=test
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -q -U postgres -d postgres" ]
+      interval: 5s
+      timeout: 30s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  postgres_data:
