@@ -25,6 +25,7 @@ type PublicationService interface {
 	GetMarkupPublication(publication []entity.Publication, command string) (*tgbotapi.InlineKeyboardMarkup, error)
 	GetAllPublicationByID(ctx context.Context, publicationID int) ([]entity.Publication, error)
 	GetOnePublicationByID(ctx context.Context, publicationID int) (*entity.Publication, error)
+	GetSentAndWaitingToDeletePublication(ctx context.Context) ([]*entity.Publication, error)
 
 	UpdatePublicationButton(ctx context.Context, publicationID int, buttonUrl, buttonText *string) error
 	UpdatePublicationText(ctx context.Context, publicationID int, text string) error
@@ -32,6 +33,7 @@ type PublicationService interface {
 	UpdatePublicationImage(ctx context.Context, publicationID int, image *string) error
 	UpdatePublicationDate(ctx context.Context, publicationID int, date time.Time) error
 	UpdateDeleteDate(ctx context.Context, publicationID int, date time.Time) error
+	UpdateMessageID(ctx context.Context, publicationID int, messageID int64) error
 }
 
 type publicationService struct {
@@ -51,6 +53,14 @@ func NewPublicationService(publicationRepo repo.PublicationRepo, log *logger.Log
 		publicationRepo: publicationRepo,
 		log:             log,
 	}, nil
+}
+
+func (p *publicationService) GetSentAndWaitingToDeletePublication(ctx context.Context) ([]*entity.Publication, error) {
+	return p.publicationRepo.GetSentAndWaitingToDeletePublication(ctx)
+}
+
+func (p *publicationService) UpdateMessageID(ctx context.Context, publicationID int, messageID int64) error {
+	return p.publicationRepo.UpdateMessageID(ctx, publicationID, messageID)
 }
 
 func (p *publicationService) GetOnePublicationByID(ctx context.Context, publicationID int) (*entity.Publication, error) {
@@ -149,9 +159,12 @@ func (p *publicationService) createPublicationMarkup(publication []entity.Public
 				status = `❌`
 			}
 
-			if utf8.RuneCountInString(el.Text) < 10 {
+			switch {
+			case utf8.RuneCountInString(el.Text) == 0:
+				text = "Пусто"
+			case utf8.RuneCountInString(el.Text) < 10:
 				text = el.Text[:len(el.Text)-1]
-			} else {
+			default:
 				text = el.Text[:10]
 			}
 

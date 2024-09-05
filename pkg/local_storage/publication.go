@@ -67,6 +67,7 @@ func (p *PublicationArray) RemovePub(arr *PubData) {
 			copy(p.publicationDataArray[key:], p.publicationDataArray[key+1:])
 			p.publicationDataArray[len(p.publicationDataArray)-1] = nil
 			p.publicationDataArray = p.publicationDataArray[:len(p.publicationDataArray)-1]
+			break
 		}
 	}
 	p.mu.Unlock()

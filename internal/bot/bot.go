@@ -185,8 +185,8 @@ func (b *Bot) initScheduled(ctx context.Context) {
 	}
 	b.publicationSchedule = publicationSchedule
 
-	if err := publicationSchedule.LoadDatabaseInPubStore(ctx); err != nil {
-		b.log.Fatal("LoadDatabaseInPubStore: %v", err)
+	if err := publicationSchedule.LoadDatabaseInPubDelStore(ctx); err != nil {
+		b.log.Fatal("LoadDatabaseInPubDelStore: %v", err)
 	}
 	go publicationSchedule.Start(ctx)
 

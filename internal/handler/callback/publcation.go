@@ -86,7 +86,6 @@ func (c *callbackPublication) CallbackCreatePublication() tgbot.ViewFunc {
 
 		text := "Для создания публикации отправьте сообщение следующего вида:\n" +
 			`	{
-			  "текст": "сообщение",
 			  "дата_публикации": "2024-08-27 15:48",
 			  "дата_удаления": "2024-08-27 15:49",
 			  "кнопка": {
@@ -96,7 +95,6 @@ func (c *callbackPublication) CallbackCreatePublication() tgbot.ViewFunc {
 			}` +
 			"\n\n Обязательными полями являются: текс, дата_публикации\n\n" +
 			`{
-				"текст": "сообщение",
 				 "дата_публикации": "2024-08-27 15:48"
 				}`
 
@@ -135,7 +133,7 @@ func (c *callbackPublication) CallbackGetPublicationGet() tgbot.ViewFunc {
 			return err
 		}
 
-		text := fmt.Sprintf("<strong>Изменение публикации</strong>\n\n"+
+		text := fmt.Sprintf("*Изменение публикации*\n\n"+
 			"Канал: %s\n"+
 			"Время удаления: %v\n"+
 			"Время отправления: %v", publication.ChannelName, publication.DeleteDate, publication.PublicationDate)
@@ -171,7 +169,7 @@ func (c *callbackPublication) CallbackUpdatePublicationSettings() tgbot.ViewFunc
 			return err
 		}
 
-		text := fmt.Sprintf("Публикации для канала: <strong>%s</strong>\n\n❌ - ошибка при удалении/ошибка при отправке\n"+
+		text := fmt.Sprintf("Публикации для канала: **%s**\n\n❌ - ошибка при удалении/ошибка при отправке\n"+
 			"✅ - отправлено\n⏱ - ожидает отправки\n🗑 - удалено из канала", channel.ChannelName)
 		_, err = c.tgMsg.SendEditMessage(update.FromChat().ID,
 			update.CallbackQuery.Message.MessageID,
@@ -386,8 +384,8 @@ func (c *callbackPublication) CallbackGetListForCancelPublication() tgbot.ViewFu
 			return err
 		}
 
-		text := fmt.Sprintf("Публикации для канала: <strong>%s</strong>\\n\\n❌ - ошибка при удалении/ошибка при отправке\\n\"+\n\t\t\t\"✅ - отправлено\\n⏱ - ожидает отправки\\n🗑 - удалено из канала"+
-			"\n\n Нажмите на публикацию чтобы ее <strong>удалить</strong>", channel.ChannelName)
+		text := fmt.Sprintf("Публикации для канала: **%s**\\n\\n❌ - ошибка при удалении|ошибка при отправке\\n\"+\n\t\t\t\"✅ - отправлено\\n⏱ - ожидает отправки\\n🗑 - удалено из канала"+
+			"\n\n Нажмите на публикацию чтобы ее *удалить*", channel.ChannelName)
 		_, err = c.tgMsg.SendEditMessage(update.FromChat().ID,
 			update.CallbackQuery.Message.MessageID,
 			publicationMarkup,
@@ -453,7 +451,7 @@ func (c *callbackPublication) CallbackCancelUpdate() tgbot.ViewFunc {
 			return err
 		}
 
-		text := fmt.Sprintf("Публикации для канала: <strong>%s</strong>\n\n❌ - ошибка при удалении/ошибка при отправке\n"+
+		text := fmt.Sprintf("Публикации для канала: **%s**\n\n❌ - ошибка при удалении|ошибка при отправке\n"+
 			"✅ - отправлено\n⏱ - ожидает отправки\n🗑 - удалено из канала", publication[0].ChannelName)
 		_, err = c.tgMsg.SendEditMessage(update.FromChat().ID,
 			update.CallbackQuery.Message.MessageID,

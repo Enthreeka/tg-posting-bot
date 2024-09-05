@@ -8,7 +8,16 @@ import (
 	store "github.com/Enthreeka/tg-posting-bot/pkg/local_storage"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"time"
+	"unicode/utf16"
 )
+
+var needEscape = make(map[rune]struct{})
+
+func init() {
+	for _, r := range []rune{'_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'} {
+		needEscape[r] = struct{}{}
+	}
+}
 
 func (b *Bot) isStateExist(userID int64) (*store.Data, bool) {
 	data, exist := b.store.Read(userID)
@@ -69,7 +78,7 @@ func (b *Bot) switchStoreData(ctx context.Context, update *tgbotapi.Update, stor
 
 	case store.PublicationTextUpdate:
 		// todo переделать с storeData.ChannelID на storeData.PublicationID
-		if err = b.publicationService.UpdatePublicationText(ctx, storeData.ChannelID, update.Message.Text); err != nil {
+		if err = b.publicationService.UpdatePublicationText(ctx, storeData.ChannelID, ConvertToMarkdownV2(update.Message.Text, update.Message.Entities)); err != nil {
 			b.log.Error("isStoreExist::store.PublicationTextUpdate: %v", err)
 		}
 	case store.PublicationImageUpdate:
@@ -143,4 +152,51 @@ func (b *Bot) switchStoreData(ctx context.Context, update *tgbotapi.Update, stor
 		b.response(storeData.OperationType, storeData.CurrentMsgID, storeData.PreferMsgID, storeData.ChannelID, update)
 	}
 	return true, err
+}
+
+func ConvertToMarkdownV2(text string, messageEntities []tgbotapi.MessageEntity) string {
+	insertions := make(map[int]string)
+	for _, e := range messageEntities {
+		var before, after string
+		if e.IsBold() {
+			before = "*"
+			after = "*"
+		} else if e.IsItalic() {
+			before = "_"
+			after = "_"
+		} else if e.Type == "underline" {
+			before = "__"
+			after = "__"
+		} else if e.Type == "strikethrough" {
+			before = "~"
+			after = "~"
+		} else if e.IsCode() {
+			before = "`"
+			after = "`"
+		} else if e.IsPre() {
+			before = "```" + e.Language
+			after = "```"
+		} else if e.IsTextLink() {
+			before = "["
+			after = "](" + e.URL + ")"
+		}
+		if before != "" {
+			insertions[e.Offset] += before
+			insertions[e.Offset+e.Length] += after
+		}
+	}
+
+	input := []rune(text)
+	var output []rune
+	utf16pos := 0
+	for _, c := range input {
+		output = append(output, []rune(insertions[utf16pos])...)
+		if _, has := needEscape[c]; has {
+			output = append(output, '\\')
+		}
+		output = append(output, c)
+		utf16pos += len(utf16.Encode([]rune{c}))
+	}
+	output = append(output, []rune(insertions[utf16pos])...)
+	return string(output)
 }

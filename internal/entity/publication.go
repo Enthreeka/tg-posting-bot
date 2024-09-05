@@ -25,6 +25,7 @@ type Publication struct {
 	ButtonText        *string           `json:"button_text"`
 	PublicationDate   time.Time         `json:"publication_date"`
 	DeleteDate        *time.Time        `json:"delete_date"`
+	MessageID         int64             `json:"message_id"`
 
 	// channel table - for join
 	TelegramChannelID int64  `json:"tg_id"`

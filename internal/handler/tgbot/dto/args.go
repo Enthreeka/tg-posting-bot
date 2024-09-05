@@ -11,7 +11,6 @@ type Button struct {
 }
 
 type PublicationCreate struct {
-	Text            string     `json:"текст"`
 	PublicationDate time.Time  `json:"дата_публикации"`
 	DeleteDate      *time.Time `json:"дата_удаления"`
 	Button          Button     `json:"кнопка"`
@@ -26,7 +25,6 @@ func (c *PublicationCreate) UnmarshalJSON(b []byte) (err error) {
 		return
 	}
 
-	c.Text, _ = jsonMap["текст"].(string)
 	publicationDateStr, _ := jsonMap["дата_публикации"].(string)
 	c.PublicationDate, err = time.Parse(Layout, publicationDateStr+":00 +0300")
 	if err != nil {

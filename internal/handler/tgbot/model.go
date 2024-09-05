@@ -38,7 +38,6 @@ func channelUpdateToModel(update *tgbotapi.Update) *entity.Channel {
 func dtoPublicationCreateToModel(dto dto.PublicationCreate, channelID int64) *entity.Publication {
 	return &entity.Publication{
 		ChannelID:         channelID,
-		Text:              dto.Text,
 		DeleteDate:        dto.DeleteDate,
 		PublicationDate:   dto.PublicationDate,
 		ButtonText:        dto.Button.ButtonText,

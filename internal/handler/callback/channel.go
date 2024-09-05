@@ -71,7 +71,7 @@ func (c *callbackChannel) CallbackShowAllChannels() tgbot.ViewFunc {
 			return nil
 		}
 
-		text := `<strong>Ниже представлен список каналов, в которых бот является администратором</strong>`
+		text := `*Ниже представлен список каналов, в которых бот является администратором*`
 
 		if _, err := c.tgMsg.SendEditMessage(update.FromChat().ID,
 			update.CallbackQuery.Message.MessageID,

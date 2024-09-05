@@ -52,10 +52,10 @@ create table if not exists publication(
     button_text varchar(150) null,
     publication_date timestamp with time zone not null,
     delete_date timestamp with time zone,
+    message_id bigint default null,
     primary key (id),
     foreign key (channel_id)
         references channel (id) on delete cascade
 );
 
-
-
+alter table publication add column message_id bigint default null;

@@ -20,6 +20,7 @@ type PublicationRepo interface {
 	GetPublicationAndChannel(ctx context.Context, publicationID int) (*entity.Publication, error)
 	GetAllPublicationByID(ctx context.Context, publicationID int) ([]entity.Publication, error)
 	GetOnePublicationByID(ctx context.Context, publicationID int) (*entity.Publication, error)
+	GetSentAndWaitingToDeletePublication(ctx context.Context) ([]*entity.Publication, error)
 
 	UpdatePublicationButton(ctx context.Context, publicationID int, buttonUrl, buttonText *string) error
 	UpdatePublicationText(ctx context.Context, publicationID int, text string) error
@@ -27,6 +28,7 @@ type PublicationRepo interface {
 	UpdatePublicationImage(ctx context.Context, publicationID int, image *string) error
 	UpdatePublicationDate(ctx context.Context, publicationID int, date time.Time) error
 	UpdateDeleteDate(ctx context.Context, publicationID int, date time.Time) error
+	UpdateMessageID(ctx context.Context, publicationID int, messageID int64) error
 
 	IsExistPublication(ctx context.Context, publicationID int) (bool, error)
 }
@@ -295,4 +297,44 @@ func (p *publicationRepo) GetOnePublicationByID(ctx context.Context, publication
 	}
 
 	return &publication, nil
+}
+
+func (p *publicationRepo) UpdateMessageID(ctx context.Context, publicationID int, messageID int64) error {
+	query := `update publication set message_id = $1 where id = $2`
+
+	_, err := p.Pool.Exec(ctx, query, messageID, publicationID)
+	return err
+}
+
+func (p *publicationRepo) GetSentAndWaitingToDeletePublication(ctx context.Context) ([]*entity.Publication, error) {
+	query := `select id, message_id, delete_date from publication
+				where publication_status = 'sent' and delete_date > CURRENT_TIMESTAMP and message_id is not null`
+	rows, err := p.Pool.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	publications := make([]*entity.Publication, 0)
+	for rows.Next() {
+		publication := new(entity.Publication)
+		err := rows.Scan(&publication.ID,
+			&publication.MessageID,
+			&publication.DeleteDate,
+		)
+		if err != nil {
+			if checkErr := ErrorHandler(err); checkErr != nil {
+				return nil, checkErr
+			}
+			return nil, err
+		}
+
+		publications = append(publications, publication)
+	}
+	if rows.Err() != nil {
+		return nil, err
+	}
+
+	return publications, nil
+
 }

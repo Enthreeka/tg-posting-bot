@@ -5,6 +5,7 @@ import (
 	"github.com/Enthreeka/tg-posting-bot/pkg/logger"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"go.uber.org/zap"
+	"strings"
 )
 
 type Message interface {
@@ -66,7 +67,7 @@ func (t *TelegramMsg) SendDocument(chatID int64, fileName string, fileIDBytes *[
 		Name:  fileName,
 		Bytes: *fileIDBytes,
 	})
-	msg.ParseMode = tgbotapi.ModeHTML
+	msg.ParseMode = tgbotapi.ModeMarkdownV2
 	msg.Caption = text
 
 	sendMsg, err := t.bot.Send(msg)
@@ -89,7 +90,7 @@ func (t *TelegramMsg) SendMessageToUser(chatID int64, publication *entity.Public
 		if publication.Text != "" {
 			msg.Caption = publication.Text
 		}
-
+		msg.ParseMode = tgbotapi.ModeMarkdownV2
 		sendMsg, err := t.bot.Send(msg)
 		if err != nil {
 			t.log.Error("failed to send message: %v", err)
@@ -99,6 +100,7 @@ func (t *TelegramMsg) SendMessageToUser(chatID int64, publication *entity.Public
 	}
 
 	msg := tgbotapi.NewMessage(chatID, "")
+	msg.ParseMode = tgbotapi.ModeMarkdownV2
 	buttonMarkup := buttonQualifier(publication.ButtonUrl, publication.ButtonText)
 	if buttonMarkup != nil {
 		msg.ReplyMarkup = &buttonMarkup
@@ -128,6 +130,7 @@ func (t *TelegramMsg) SendMessageToChannel(username string, publication *entity.
 	if publication.Image != nil {
 		publicationPhoto := tgbotapi.NewInputMediaPhoto(tgbotapi.FileID(*publication.Image))
 		msg := tgbotapi.NewPhotoToChannel(username, publicationPhoto.Media)
+		msg.ParseMode = tgbotapi.ModeMarkdownV2
 		buttonMarkup := buttonQualifier(publication.ButtonUrl, publication.ButtonText)
 		if buttonMarkup != nil {
 			msg.ReplyMarkup = &buttonMarkup
@@ -144,6 +147,7 @@ func (t *TelegramMsg) SendMessageToChannel(username string, publication *entity.
 	}
 
 	msg := tgbotapi.NewMessageToChannel(username, "")
+	msg.ParseMode = tgbotapi.ModeMarkdownV2
 	buttonMarkup := buttonQualifier(publication.ButtonUrl, publication.ButtonText)
 	if buttonMarkup != nil {
 		msg.ReplyMarkup = &buttonMarkup
@@ -176,4 +180,12 @@ func buttonQualifier(buttonText *string, buttonURL *string) *tgbotapi.InlineKeyb
 		return &button
 	}
 	return nil
+}
+
+func escapeSpecialCharacters(text string) string {
+	specialChars := []string{"<", ">", "[", "]", "(", ")", "~", "`", "#", "+", "-", "=", "|", "{", "}", ".", "!"}
+	for _, char := range specialChars {
+		text = strings.ReplaceAll(text, char, `\`+char)
+	}
+	return text
 }
