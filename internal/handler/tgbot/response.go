@@ -1,6 +1,8 @@
 package tgbot
 
 import (
+	"context"
+	"fmt"
 	store "github.com/Enthreeka/tg-posting-bot/pkg/local_storage"
 	"github.com/Enthreeka/tg-posting-bot/pkg/tg_bot_api/markup"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -34,13 +36,13 @@ func (b *Bot) response(operationType store.TypeCommand, currentMessageId int, pr
 		}
 	}
 
-	text, markup := responseText(operationType, channelID)
+	text, markup := b.responseText(operationType, channelID)
 	if _, err := b.tgMsg.SendEditMessage(userID, preferMessageId, markup, text); err != nil {
 		b.log.Error("failed to send telegram message: ", err)
 	}
 }
 
-func responseText(operationType store.TypeCommand, channelID int) (string, *tgbotapi.InlineKeyboardMarkup) {
+func (b *Bot) responseText(operationType store.TypeCommand, channelID int) (string, *tgbotapi.InlineKeyboardMarkup) {
 	switch operationType {
 	case store.AdminCreate:
 		return success + "Пользователь получил администраторские права.", &markup.UserSetting
@@ -49,6 +51,19 @@ func responseText(operationType store.TypeCommand, channelID int) (string, *tgbo
 	case store.PublicationCreate:
 		keyMarkup := markup.ChannelSetting(channelID)
 		return success + "Публикация добавлена.", &keyMarkup
+	case store.PublicationTextUpdate:
+		publication, err := b.publicationService.GetPublicationAndChannel(context.Background(), channelID)
+		if err != nil {
+			b.log.Error("failed to GetPublicationAndChannel: %v", err)
+			return "Ошибка получения данных канала", nil
+		}
+
+		text := fmt.Sprintf("*Изменение публикации*\n\n"+
+			"Канал: %s\n"+
+			"Время удаления: %v\n"+
+			"Время отправления: %v", publication.ChannelName, publication.DeleteDate, publication.PublicationDate)
+		updatePublicationSettingsMarkup := markup.UpdatePublicationSettings(channelID)
+		return text, &updatePublicationSettingsMarkup
 	}
 	return success, nil
 }

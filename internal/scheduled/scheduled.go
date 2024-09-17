@@ -202,6 +202,12 @@ func (s *schedule) Start(ctx context.Context) error {
 							s.log.Error("Failed to update publication, publicationID - %d, status - %v, err - %v", pubID, status, err)
 						}
 
+						if status == entity.StatusDeletedByBot {
+							if err := s.publicationService.DeletePublication(ctx, pubID); err != nil {
+								s.log.Error("Failed to delete publication, publicationID - %d, status - %v, err - %v", pubID, status, err)
+							}
+						}
+
 						s.log.Info("Deleted publication for publicationID %d", pubID)
 					}(value.ChannelID, value.SentMsgID, value.PublicationID)
 				}

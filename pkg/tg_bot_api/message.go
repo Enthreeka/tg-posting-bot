@@ -32,6 +32,7 @@ func NewMessageSetting(bot *tgbotapi.BotAPI, log *logger.Logger) *TelegramMsg {
 func (t *TelegramMsg) SendNewMessage(chatID int64, markup *tgbotapi.InlineKeyboardMarkup, text string) (int, error) {
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ParseMode = tgbotapi.ModeHTML
+	msg.DisableWebPagePreview = true
 	if markup != nil {
 		msg.ReplyMarkup = &markup
 	}
@@ -48,6 +49,7 @@ func (t *TelegramMsg) SendNewMessage(chatID int64, markup *tgbotapi.InlineKeyboa
 func (t *TelegramMsg) SendEditMessage(chatID int64, messageID int, markup *tgbotapi.InlineKeyboardMarkup, text string) (int, error) {
 	msg := tgbotapi.NewEditMessageText(chatID, messageID, text)
 	msg.ParseMode = tgbotapi.ModeHTML
+	msg.DisableWebPagePreview = true
 
 	if markup != nil {
 		msg.ReplyMarkup = markup
@@ -100,6 +102,7 @@ func (t *TelegramMsg) SendMessageToUser(chatID int64, publication *entity.Public
 	}
 
 	msg := tgbotapi.NewMessage(chatID, "")
+	msg.DisableWebPagePreview = true
 	msg.ParseMode = tgbotapi.ModeMarkdownV2
 	buttonMarkup := buttonQualifier(publication.ButtonUrl, publication.ButtonText)
 	if buttonMarkup != nil {
@@ -147,6 +150,7 @@ func (t *TelegramMsg) SendMessageToChannel(username string, publication *entity.
 	}
 
 	msg := tgbotapi.NewMessageToChannel(username, "")
+	msg.DisableWebPagePreview = true
 	msg.ParseMode = tgbotapi.ModeMarkdownV2
 	buttonMarkup := buttonQualifier(publication.ButtonUrl, publication.ButtonText)
 	if buttonMarkup != nil {
