@@ -51,7 +51,7 @@ func (b *Bot) responseText(operationType store.TypeCommand, channelID int) (stri
 	case store.PublicationCreate:
 		keyMarkup := markup.ChannelSetting(channelID)
 		return success + "Публикация добавлена.", &keyMarkup
-	case store.PublicationTextUpdate:
+	case store.PublicationTextUpdate, store.PublicationImageUpdate:
 		publication, err := b.publicationService.GetPublicationAndChannel(context.Background(), channelID)
 		if err != nil {
 			b.log.Error("failed to GetPublicationAndChannel: %v", err)
