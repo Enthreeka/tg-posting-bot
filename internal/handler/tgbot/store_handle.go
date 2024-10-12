@@ -170,6 +170,9 @@ func ConvertToMarkdownV2(text string, messageEntities []tgbotapi.MessageEntity) 
 		} else if e.Type == "strikethrough" {
 			before = "~"
 			after = "~"
+			//} else if e.Type == "spoiler" {
+			//	before = "||"
+			//	after = "||"
 		} else if e.IsCode() {
 			before = "`"
 			after = "`"

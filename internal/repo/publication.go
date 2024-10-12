@@ -153,13 +153,13 @@ func (p *publicationRepo) UpdatePublicationImage(ctx context.Context, publicatio
 
 func (p *publicationRepo) UpdatePublicationDate(ctx context.Context, publicationID int, date time.Time) error {
 	query := `update publication set publication_date = $1 where id = $2`
-	_, err := p.Pool.Exec(ctx, query, publicationID, date)
+	_, err := p.Pool.Exec(ctx, query, date, publicationID)
 	return err
 }
 
 func (p *publicationRepo) UpdateDeleteDate(ctx context.Context, publicationID int, date time.Time) error {
 	query := `update publication set delete_date = $1 where id = $2`
-	_, err := p.Pool.Exec(ctx, query, publicationID, date)
+	_, err := p.Pool.Exec(ctx, query, date, publicationID)
 	return err
 }
 
