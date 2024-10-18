@@ -51,31 +51,11 @@ func (b *Bot) switchStoreData(ctx context.Context, update *tgbotapi.Update, stor
 			b.log.Error("isStoreExist::store.AdminDelete:userRepo.UpdateRoleByUsername: %v", err)
 		}
 	case store.PublicationCreate:
-		var (
-			id   int
-			args dto.PublicationCreate
-		)
-		args, err = encoding.ParseJSON[dto.PublicationCreate](update.Message.Text)
-		if err != nil {
-			b.log.Error("ParseJSON: %v", err)
-			return true, err
-		}
 
-		if err = PublicationCreateValidation(args); err != nil {
-			return true, err
-		}
-
-		id, err = b.publicationService.CreatePublication(ctx, dtoPublicationCreateToModel(args, int64(storeData.ChannelID)))
+		_, err = b.publicationService.CreatePublicationOnlyWithText(ctx, update.Message.Text, storeData.ChannelID)
 		if err != nil {
 			b.log.Error("isStoreExist::store.PublicationCreate: %v", err)
 		}
-		if err == nil {
-			b.publicationArray.AppendPub(&store.PubData{
-				PubDate:       args.PublicationDate,
-				PublicationID: id,
-			})
-		}
-
 	case store.PublicationTextUpdate:
 		// todo переделать с storeData.ChannelID на storeData.PublicationID
 		if err = b.publicationService.UpdatePublicationText(ctx, storeData.ChannelID, ConvertToMarkdownV2(update.Message.Text, update.Message.Entities)); err != nil {

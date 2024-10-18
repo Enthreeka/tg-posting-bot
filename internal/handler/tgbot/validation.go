@@ -6,12 +6,7 @@ import (
 	"time"
 )
 
-// todo вынести ошибки в custom err
 func PublicationCreateValidation(msg dto.PublicationCreate) error {
-	//if msg.Text == "" {
-	//	return errors.New("текст должен быть заполнен")
-	//}
-
 	loc, err := time.LoadLocation("Europe/Moscow")
 	if err != nil {
 		return err
