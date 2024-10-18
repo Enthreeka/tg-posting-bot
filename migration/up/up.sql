@@ -58,4 +58,8 @@ create table if not exists publication(
         references channel (id) on delete cascade
 );
 
+
+ALTER TABLE publication
+    ALTER COLUMN publication_status DROP NOT NULL;
+
 alter table publication add column message_id bigint default null;

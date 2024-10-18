@@ -11,6 +11,7 @@ import (
 
 type PublicationRepo interface {
 	CreatePublication(ctx context.Context, publication *entity.Publication) (int, error)
+	CreatePublicationOnlyWithText(ctx context.Context, text string, id int) (int, error)
 
 	DeletePublication(ctx context.Context, publicationID int) error
 
@@ -77,6 +78,13 @@ func (p *publicationRepo) GetPublicationByPublicationID(ctx context.Context, pub
 
 	row := p.Pool.QueryRow(ctx, query, publicationID)
 	return p.collectRow(row)
+}
+
+func (p *publicationRepo) CreatePublicationOnlyWithText(ctx context.Context, text string, id int) (int, error) {
+	query := `insert into publication (channel_id,text) values ($1,$2) returning id`
+
+	err := p.Pool.QueryRow(ctx, query, id, text).Scan(&id)
+	return id, err
 }
 
 func (p *publicationRepo) CreatePublication(ctx context.Context, publication *entity.Publication) (int, error) {

@@ -133,7 +133,7 @@ func (c *callbackPublication) CallbackGetPublicationGet() tgbot.ViewFunc {
 			return err
 		}
 
-		text := fmt.Sprintf("*Изменение публикации*\n\n"+
+		text := fmt.Sprintf("Изменение публикации\n\n"+
 			"Канал: %s\n"+
 			"Время удаления: %v\n"+
 			"Время отправления: %v", publication.ChannelName, publication.DeleteDate, publication.PublicationDate)
@@ -407,17 +407,11 @@ func (c *callbackPublication) CallbackDeletePublication() tgbot.ViewFunc {
 			return customErr.ErrNotFound
 		}
 
-		publication, err := c.publicationService.GetPublicationByPublicationID(ctx, publicationID)
-		if err != nil {
-			return err
-		}
-
 		if err := c.publicationService.DeletePublication(ctx, publicationID); err != nil {
 			c.log.Error("failed to delete publication: %v", err)
 		}
 
 		c.publicationArray.RemovePub(&store.PubData{
-			PubDate:       publication.PublicationDate,
 			PublicationID: publicationID,
 		})
 

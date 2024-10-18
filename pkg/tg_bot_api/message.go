@@ -48,7 +48,6 @@ func (t *TelegramMsg) SendNewMessage(chatID int64, markup *tgbotapi.InlineKeyboa
 
 func (t *TelegramMsg) SendEditMessage(chatID int64, messageID int, markup *tgbotapi.InlineKeyboardMarkup, text string) (int, error) {
 	msg := tgbotapi.NewEditMessageText(chatID, messageID, text)
-	msg.ParseMode = tgbotapi.ModeHTML
 	msg.DisableWebPagePreview = true
 
 	if markup != nil {

@@ -63,6 +63,10 @@ func (s *schedule) LoadDatabaseInPubDelStore(ctx context.Context) error {
 
 	var countPubs int
 	for _, value := range publications {
+		if value.PublicationDate == nil {
+			continue
+		}
+
 		if value.PublicationDate.Before(time.Now().In(loc)) {
 			go func() {
 				if err := s.publicationService.UpdatePublicationStatus(ctx, value.ID, entity.StatusErrorOnSending); err != nil {
@@ -73,7 +77,7 @@ func (s *schedule) LoadDatabaseInPubDelStore(ctx context.Context) error {
 		}
 		s.pubStore.AppendPub(&store.PubData{
 			PublicationID: value.ID,
-			PubDate:       value.PublicationDate,
+			PubDate:       *value.PublicationDate,
 		})
 		countPubs++
 	}

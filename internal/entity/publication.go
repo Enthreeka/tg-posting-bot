@@ -23,7 +23,7 @@ type Publication struct {
 	Image             *string           `json:"image"`
 	ButtonUrl         *string           `json:"button_url"`
 	ButtonText        *string           `json:"button_text"`
-	PublicationDate   time.Time         `json:"publication_date"`
+	PublicationDate   *time.Time        `json:"publication_date"`
 	DeleteDate        *time.Time        `json:"delete_date"`
 	MessageID         int64             `json:"message_id"`
 
