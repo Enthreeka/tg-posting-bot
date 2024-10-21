@@ -15,6 +15,7 @@ import (
 
 type PublicationService interface {
 	CreatePublication(ctx context.Context, publication *entity.Publication) (int, error)
+	CreatePublicationOnlyWithText(ctx context.Context, text string, id int) (int, error)
 
 	DeletePublication(ctx context.Context, channelId int) error
 
@@ -168,7 +169,14 @@ func (p *publicationService) createPublicationMarkup(publication []entity.Public
 				text = el.Text[:10]
 			}
 
-			btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s...%v %s", text, el.PublicationDate.Format(time.DateTime), status),
+			var date string
+			if el.PublicationDate == nil {
+				date = "[Дата не назначена]"
+			} else {
+				date = el.PublicationDate.Format(time.DateTime)
+			}
+
+			btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%s...%v %s", text, date, status),
 				fmt.Sprintf("publication_%s_%d", command, el.ID))
 
 			row = append(row, btn)
@@ -184,4 +192,8 @@ func (p *publicationService) createPublicationMarkup(publication []entity.Public
 	markup := tgbotapi.NewInlineKeyboardMarkup(rows...)
 
 	return &markup, nil
+}
+
+func (p *publicationService) CreatePublicationOnlyWithText(ctx context.Context, text string, id int) (int, error) {
+	return p.publicationRepo.CreatePublicationOnlyWithText(ctx, text, id)
 }

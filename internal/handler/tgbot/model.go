@@ -2,7 +2,6 @@ package tgbot
 
 import (
 	"github.com/Enthreeka/tg-posting-bot/internal/entity"
-	"github.com/Enthreeka/tg-posting-bot/internal/handler/tgbot/dto"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"time"
 )
@@ -33,15 +32,4 @@ func channelUpdateToModel(update *tgbotapi.Update) *entity.Channel {
 	}
 
 	return channel
-}
-
-func dtoPublicationCreateToModel(dto dto.PublicationCreate, channelID int64) *entity.Publication {
-	return &entity.Publication{
-		ChannelID:         channelID,
-		DeleteDate:        dto.DeleteDate,
-		PublicationDate:   dto.PublicationDate,
-		ButtonText:        dto.Button.ButtonText,
-		ButtonUrl:         dto.Button.ButtonUrl,
-		PublicationStatus: entity.StatusAwaits,
-	}
 }
