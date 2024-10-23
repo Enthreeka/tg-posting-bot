@@ -2,11 +2,12 @@ package tgbot
 
 import (
 	"context"
+	"errors"
 	"github.com/Enthreeka/tg-posting-bot/internal/entity"
 	"github.com/Enthreeka/tg-posting-bot/internal/handler/tgbot/dto"
-	"github.com/Enthreeka/tg-posting-bot/pkg/encoding"
 	store "github.com/Enthreeka/tg-posting-bot/pkg/local_storage"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"net/url"
 	"time"
 	"unicode/utf16"
 )
@@ -52,7 +53,7 @@ func (b *Bot) switchStoreData(ctx context.Context, update *tgbotapi.Update, stor
 		}
 	case store.PublicationCreate:
 
-		_, err = b.publicationService.CreatePublicationOnlyWithText(ctx, update.Message.Text, storeData.ChannelID)
+		_, err = b.publicationService.CreatePublicationOnlyWithText(ctx, ConvertToMarkdownV2(update.Message.Text, update.Message.Entities), storeData.ChannelID)
 		if err != nil {
 			b.log.Error("isStoreExist::store.PublicationCreate: %v", err)
 		}
@@ -67,18 +68,20 @@ func (b *Bot) switchStoreData(ctx context.Context, update *tgbotapi.Update, stor
 		if err = b.publicationService.UpdatePublicationImage(ctx, storeData.ChannelID, &largestPhoto.FileID); err != nil {
 			b.log.Error("isStoreExist::store.PublicationTextImage: %v", err)
 		}
-	case store.PublicationButtonUpdate:
-		var (
-			args dto.Button
-		)
-		args, err = encoding.ParseJSON[dto.Button](update.Message.Text)
-		if err != nil {
-			b.log.Error("ParseJSON: %v", err)
-			return true, err
-		}
+	case store.PublicationButtonTextUpdate:
 		// todo переделать с storeData.ChannelID на storeData.PublicationID
-		if err = b.publicationService.UpdatePublicationButton(ctx, storeData.ChannelID, args.ButtonUrl, args.ButtonText); err != nil {
-			b.log.Error("isStoreExist::store.PublicationButtonUpdate: %v", err)
+		if err = b.publicationService.UpdatePublicationButtonText(ctx, storeData.ChannelID, update.Message.Text); err != nil {
+			b.log.Error("isStoreExist::store.PublicationButtonTextUpdate: %v", err)
+		}
+	case store.PublicationButtonLinkUpdate:
+		// todo переделать с storeData.ChannelID на storeData.PublicationID
+		if _, err = url.ParseRequestURI(update.Message.Text); err != nil {
+			b.log.Error("isStoreExist::store.PublicationButtonLinkUpdate: %v", err)
+			return true, errors.New("ошибка: невалидная ссылка")
+		}
+
+		if err = b.publicationService.UpdatePublicationButtonLink(ctx, storeData.ChannelID, update.Message.Text); err != nil {
+			b.log.Error("isStoreExist::store.PublicationButtonLinkUpdate: %v", err)
 		}
 	case store.PublicationDeleteDateUpdate:
 		var (
@@ -99,6 +102,8 @@ func (b *Bot) switchStoreData(ctx context.Context, update *tgbotapi.Update, stor
 			b.log.Error("isStoreExist::store.PublicationDeleteDateUpdate: %v", err)
 		}
 
+		// удаление происходит в [scheduled.go] в случае успешной отправки сообщения
+
 	case store.PublicationSentDateUpdate:
 		var (
 			date time.Time
@@ -118,7 +123,8 @@ func (b *Bot) switchStoreData(ctx context.Context, update *tgbotapi.Update, stor
 			b.log.Error("isStoreExist::store.PublicationSentDateUpdate: %v", err)
 		}
 		if err == nil {
-			b.publicationArray.ReplacePub(&store.PubData{
+			b.log.Info("set publication date: date=%v channelID=%d", date, storeData.ChannelID)
+			b.publicationArray.AppendPub(&store.PubData{
 				PubDate:       date,
 				PublicationID: storeData.ChannelID,
 			})

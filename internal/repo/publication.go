@@ -23,7 +23,8 @@ type PublicationRepo interface {
 	GetOnePublicationByID(ctx context.Context, publicationID int) (*entity.Publication, error)
 	GetSentAndWaitingToDeletePublication(ctx context.Context) ([]*entity.Publication, error)
 
-	UpdatePublicationButton(ctx context.Context, publicationID int, buttonUrl, buttonText *string) error
+	UpdatePublicationButtonText(ctx context.Context, publicationID int, buttonText string) error
+	UpdatePublicationButtonLink(ctx context.Context, publicationID int, buttonLink string) error
 	UpdatePublicationText(ctx context.Context, publicationID int, text string) error
 	UpdatePublicationStatus(ctx context.Context, publicationID int, status entity.PublicationStatus) error
 	UpdatePublicationImage(ctx context.Context, publicationID int, image *string) error
@@ -135,9 +136,15 @@ func (p *publicationRepo) GetAllPublicationByChannelID(ctx context.Context, chan
 	return publications, nil
 }
 
-func (p *publicationRepo) UpdatePublicationButton(ctx context.Context, publicationID int, buttonUrl, buttonText *string) error {
-	query := `update publication set button_url = $1, button_text = $2  where id = $3`
-	_, err := p.Pool.Exec(ctx, query, buttonUrl, buttonText, publicationID)
+func (p *publicationRepo) UpdatePublicationButtonText(ctx context.Context, publicationID int, buttonText string) error {
+	query := `update publication set  button_text = $1  where id = $2`
+	_, err := p.Pool.Exec(ctx, query, buttonText, publicationID)
+	return err
+}
+
+func (p *publicationRepo) UpdatePublicationButtonLink(ctx context.Context, publicationID int, buttonLink string) error {
+	query := `update publication set  button_url = $1  where id = $2`
+	_, err := p.Pool.Exec(ctx, query, buttonLink, publicationID)
 	return err
 }
 

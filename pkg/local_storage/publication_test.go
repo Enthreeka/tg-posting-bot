@@ -1,52 +1,62 @@
 package store
 
 import (
-	"github.com/stretchr/testify/assert"
+	"sync"
 	"testing"
 	"time"
 )
 
 func TestNewSortPublication(t *testing.T) {
-	pubArr := NewSortPublication(0)
+	pubArr := NewSortPublication(5)
 
-	test := &Data{
-		Date:          time.Now().Add(2 * time.Hour),
-		PublicationID: 12498498,
+	pubArr.AppendPub(&PubData{PublicationID: 1, PubDate: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)})
+	pubArr.AppendPub(&PubData{PublicationID: 3, PubDate: time.Date(1, 1, 1, 1, 0, 0, 0, time.UTC)})
+	pubArr.AppendPub(&PubData{PublicationID: 4, PubDate: time.Date(1, 1, 1, 1, 1, 0, 0, time.UTC)})
+	pubArr.AppendPub(&PubData{PublicationID: 5, PubDate: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)})
+
+	var copyPubData []*PubData
+	copyPubData = append(copyPubData, pubArr.GetPub()...)
+
+	for _, value := range copyPubData {
+		if value == nil {
+			continue
+		}
+
+		if value.PubDate == time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC) {
+			pubArr.RemovePub(value)
+			t.Log(value)
+		}
+
+	}
+}
+
+func TestNewDelPublication(t *testing.T) {
+	pubArr := NewSortPublication(5)
+
+	pubArr.AppendDel(&PubData{PublicationID: 1, DelDate: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)})
+	pubArr.AppendDel(&PubData{PublicationID: 3, DelDate: time.Date(1, 1, 1, 1, 0, 0, 0, time.UTC)})
+	pubArr.AppendDel(&PubData{PublicationID: 4, DelDate: time.Date(1, 1, 1, 1, 1, 0, 0, time.UTC)})
+	pubArr.AppendDel(&PubData{PublicationID: 5, DelDate: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)})
+
+	var copyPubData []*PubData
+	copyPubData = append(copyPubData, pubArr.GetDel()...)
+
+	var wg sync.WaitGroup
+
+	for _, value := range copyPubData {
+		if value == nil {
+			continue
+		}
+
+		if value.DelDate == time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC) {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				pubArr.RemoveDel(value)
+			}()
+			t.Log(value)
+		}
 	}
 
-	pubArr.AppendPub(test)
-	pubArr.AppendPub(&Data{
-		Date:          time.Now().AddDate(0, 0, -2),
-		PublicationID: 3423,
-	})
-	pubArr.AppendPub(&Data{
-		Date:          time.Now(),
-		PublicationID: 5,
-	})
-	pubArr.AppendPub(&Data{
-		Date:          time.Now().AddDate(0, 0, -1),
-		PublicationID: 1,
-	})
-	pubArr.AppendPub(&Data{
-		Date:          time.Now().AddDate(0, 0, -2),
-		PublicationID: 3423,
-	})
-	assert.Equal(t, pubArr.LenPub(), 5)
-
-	pubArr.SortPub()
-	t.Logf("%v", pubArr.GetPub())
-	for key, value := range pubArr.GetPub() {
-		t.Logf("%d - %v", key, value)
-	}
-
-	t.Logf("%d", pubArr.CapPub())
-	pubArr.RemovePub(test)
-
-	t.Logf("%v", pubArr.GetPub())
-	for key, value := range pubArr.GetPub() {
-		t.Logf("%d - %v", key, value)
-	}
-
-	t.Logf("%d", pubArr.CapPub())
-	t.Logf("%d", pubArr.LenPub())
+	wg.Wait()
 }

@@ -185,10 +185,11 @@ func (b *Bot) initScheduled(ctx context.Context) {
 	}
 	b.publicationSchedule = publicationSchedule
 
-	if err := publicationSchedule.LoadDatabaseInPubDelStore(ctx); err != nil {
+	if err = publicationSchedule.LoadDatabaseInPubDelStore(ctx); err != nil {
 		b.log.Fatal("LoadDatabaseInPubDelStore: %v", err)
 	}
-	go publicationSchedule.Start(ctx)
+	go publicationSchedule.StartPub(ctx)
+	go publicationSchedule.StartDel(ctx)
 
 	b.log.Info("Initializing scheduled")
 }
@@ -243,7 +244,8 @@ func (b *Bot) Run(ctx context.Context) {
 	newBot.RegisterCommandCallback("publication_get", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackGetPublicationGet()))
 	newBot.RegisterCommandCallback("text_update", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackUpdatePublicationText()))
 	newBot.RegisterCommandCallback("image_update", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackUpdatePublicationImage()))
-	newBot.RegisterCommandCallback("button_update", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackUpdatePublicationButton()))
+	newBot.RegisterCommandCallback("buttontext_update", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackUpdatePublicationButtonText()))
+	newBot.RegisterCommandCallback("buttonlink_update", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackUpdatePublicationButtonLink()))
 	newBot.RegisterCommandCallback("sent-date_update", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackUpdatePublicationSentDate()))
 	newBot.RegisterCommandCallback("delete-date_update", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackUpdatePublicationDeleteDate()))
 	newBot.RegisterCommandCallback("check_publication", middleware.AdminMiddleware(b.userService, b.callbackPublication.CallbackCheckPublication()))

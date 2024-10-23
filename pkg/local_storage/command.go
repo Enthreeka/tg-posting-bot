@@ -17,9 +17,10 @@ const (
 	PublicationDelete           TypeCommand = "delete_publication"
 	PublicationTextUpdate       TypeCommand = "update_publication_text"
 	PublicationImageUpdate      TypeCommand = "update_publication_image"
-	PublicationButtonUpdate     TypeCommand = "update_publication_button"
+	PublicationButtonTextUpdate TypeCommand = "update_publication_button_text"
 	PublicationSentDateUpdate   TypeCommand = "update_publication_sent_date"
 	PublicationDeleteDateUpdate TypeCommand = "update_publication_delete_date"
+	PublicationButtonLinkUpdate TypeCommand = "update_publication_button_link"
 )
 
 var MapTypes = map[TypeCommand]OperationType{

@@ -60,6 +60,6 @@ create table if not exists publication(
 
 
 ALTER TABLE publication
-    ALTER COLUMN publication_status DROP NOT NULL;
+    ALTER COLUMN publication_date DROP NOT NULL;
 
 alter table publication add column message_id bigint default null;

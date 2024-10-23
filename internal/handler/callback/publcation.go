@@ -19,7 +19,8 @@ type PublicationChannel interface {
 	CallbackUpdatePublicationSettings() tgbot.ViewFunc
 	CallbackUpdatePublicationText() tgbot.ViewFunc
 	CallbackUpdatePublicationImage() tgbot.ViewFunc
-	CallbackUpdatePublicationButton() tgbot.ViewFunc
+	CallbackUpdatePublicationButtonText() tgbot.ViewFunc
+	CallbackUpdatePublicationButtonLink() tgbot.ViewFunc
 	CallbackUpdatePublicationSentDate() tgbot.ViewFunc
 	CallbackUpdatePublicationDeleteDate() tgbot.ViewFunc
 	CallbackCheckPublication() tgbot.ViewFunc
@@ -84,19 +85,7 @@ func (c *callbackPublication) CallbackCreatePublication() tgbot.ViewFunc {
 			return customErr.ErrNotFound
 		}
 
-		text := "Для создания публикации отправьте сообщение следующего вида:\n" +
-			`	{
-			  "дата_публикации": "2024-08-27 15:48",
-			  "дата_удаления": "2024-08-27 15:49",
-			  "кнопка": {
-				"текст_кнопки": "текст кнопки",
-				"ссылка_кнопки": "https://yandex.ru"
-			  }
-			}` +
-			"\n\n Обязательными полями являются: дата_публикации\n\n" +
-			`{
-				 "дата_публикации": "2024-08-27 15:48"
-				}`
+		text := "Для создания публикации отправьте сообщение, дальнейшие настройки публикации расположены в <Управлениями публикациями>"
 
 		cancelCommandMarkup := markup.CancelCommandCreate(channelID)
 		sentMsg, err := c.tgMsg.SendEditMessage(update.FromChat().ID,
@@ -243,8 +232,8 @@ func (c *callbackPublication) CallbackUpdatePublicationImage() tgbot.ViewFunc {
 	}
 }
 
-// CallbackUpdatePublicationButton - button_update_{publication_id}
-func (c *callbackPublication) CallbackUpdatePublicationButton() tgbot.ViewFunc {
+// CallbackUpdatePublicationButton - buttontext_update_{publication_id}
+func (c *callbackPublication) CallbackUpdatePublicationButtonText() tgbot.ViewFunc {
 	return func(ctx context.Context, bot *tgbotapi.BotAPI, update *tgbotapi.Update) error {
 		publicationID := GetID(update.CallbackData())
 		if publicationID == 0 {
@@ -252,16 +241,7 @@ func (c *callbackPublication) CallbackUpdatePublicationButton() tgbot.ViewFunc {
 			return customErr.ErrNotFound
 		}
 
-		text := "Отправьте подпись для кнопки и ссылку (ссылка не является обязательной).\n" +
-			"Пример с ссылкой:\n" +
-			`{
-				"текст_кнопки": "текст кнопки",
-				"ссылка_кнопки": "https://yandex.ru"
-			}` +
-			"Пример без ссылки:\n" +
-			`{
-				"текст_кнопки": "текст кнопки"
-			}`
+		text := "Отправьте подпись для кнопки"
 		cancelCommandMarkup := markup.CancelCommandPublication(publicationID)
 		sentMsg, err := c.tgMsg.SendEditMessage(update.FromChat().ID,
 			update.CallbackQuery.Message.MessageID,
@@ -274,7 +254,37 @@ func (c *callbackPublication) CallbackUpdatePublicationButton() tgbot.ViewFunc {
 		c.store.Set(&store.Data{
 			CurrentMsgID:  sentMsg,
 			PreferMsgID:   update.CallbackQuery.Message.MessageID,
-			OperationType: store.PublicationButtonUpdate,
+			OperationType: store.PublicationButtonTextUpdate,
+			ChannelID:     publicationID,
+		}, update.FromChat().ID)
+
+		return nil
+	}
+}
+
+// CallbackUpdatePublicationButtonLink - buttonlink_update_{publication_id}
+func (c *callbackPublication) CallbackUpdatePublicationButtonLink() tgbot.ViewFunc {
+	return func(ctx context.Context, bot *tgbotapi.BotAPI, update *tgbotapi.Update) error {
+		publicationID := GetID(update.CallbackData())
+		if publicationID == 0 {
+			c.log.Error("entity.GetID: failed to get id from channel button")
+			return customErr.ErrNotFound
+		}
+
+		text := "Отправьте ссылку для кнопки"
+		cancelCommandMarkup := markup.CancelCommandPublication(publicationID)
+		sentMsg, err := c.tgMsg.SendEditMessage(update.FromChat().ID,
+			update.CallbackQuery.Message.MessageID,
+			&cancelCommandMarkup,
+			text)
+		if err != nil {
+			return err
+		}
+
+		c.store.Set(&store.Data{
+			CurrentMsgID:  sentMsg,
+			PreferMsgID:   update.CallbackQuery.Message.MessageID,
+			OperationType: store.PublicationButtonLinkUpdate,
 			ChannelID:     publicationID,
 		}, update.FromChat().ID)
 

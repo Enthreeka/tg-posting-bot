@@ -118,6 +118,7 @@ func (p *PublicationArray) RemoveDel(arr *PubData) {
 			copy(p.deleteDataArray[key:], p.deleteDataArray[key+1:])
 			p.deleteDataArray[len(p.deleteDataArray)-1] = nil
 			p.deleteDataArray = p.deleteDataArray[:len(p.deleteDataArray)-1]
+			break
 		}
 	}
 	p.mu.Unlock()

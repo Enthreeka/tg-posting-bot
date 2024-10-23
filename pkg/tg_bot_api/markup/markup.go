@@ -76,7 +76,9 @@ func UpdatePublicationSettings(publicationId int) tgbotapi.InlineKeyboardMarkup 
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Изменить фотографию", fmt.Sprintf("image_update_%d", publicationId))),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить кнопку", fmt.Sprintf("button_update_%d", publicationId))),
+			tgbotapi.NewInlineKeyboardButtonData("Добавить текст к кнопке", fmt.Sprintf("buttontext_update_%d", publicationId))),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Добавить ссылку к кнопке", fmt.Sprintf("buttonlink_update_%d", publicationId))),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Изменить дату отправки", fmt.Sprintf("sent-date_update_%d", publicationId))),
 		tgbotapi.NewInlineKeyboardRow(

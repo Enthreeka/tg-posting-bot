@@ -167,7 +167,7 @@ func (t *TelegramMsg) SendMessageToChannel(username string, publication *entity.
 	return nil
 }
 
-func buttonQualifier(buttonText *string, buttonURL *string) *tgbotapi.InlineKeyboardMarkup {
+func buttonQualifier(buttonURL *string, buttonText *string) *tgbotapi.InlineKeyboardMarkup {
 	if buttonURL != nil && buttonText != nil {
 		var (
 			btnText string

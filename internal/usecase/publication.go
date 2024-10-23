@@ -28,7 +28,8 @@ type PublicationService interface {
 	GetOnePublicationByID(ctx context.Context, publicationID int) (*entity.Publication, error)
 	GetSentAndWaitingToDeletePublication(ctx context.Context) ([]*entity.Publication, error)
 
-	UpdatePublicationButton(ctx context.Context, publicationID int, buttonUrl, buttonText *string) error
+	UpdatePublicationButtonText(ctx context.Context, publicationID int, buttonText string) error
+	UpdatePublicationButtonLink(ctx context.Context, publicationID int, buttonLink string) error
 	UpdatePublicationText(ctx context.Context, publicationID int, text string) error
 	UpdatePublicationStatus(ctx context.Context, publicationID int, status entity.PublicationStatus) error
 	UpdatePublicationImage(ctx context.Context, publicationID int, image *string) error
@@ -90,8 +91,12 @@ func (p *publicationService) GetPublicationAndChannel(ctx context.Context, publi
 	return publication, nil
 }
 
-func (p *publicationService) UpdatePublicationButton(ctx context.Context, publicationID int, buttonUrl, buttonText *string) error {
-	return p.publicationRepo.UpdatePublicationButton(ctx, publicationID, buttonUrl, buttonText)
+func (p *publicationService) UpdatePublicationButtonText(ctx context.Context, publicationID int, buttonText string) error {
+	return p.publicationRepo.UpdatePublicationButtonText(ctx, publicationID, buttonText)
+}
+
+func (p *publicationService) UpdatePublicationButtonLink(ctx context.Context, publicationID int, buttonLink string) error {
+	return p.publicationRepo.UpdatePublicationButtonLink(ctx, publicationID, buttonLink)
 }
 
 func (p *publicationService) UpdatePublicationText(ctx context.Context, publicationID int, text string) error {
